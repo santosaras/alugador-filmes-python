@@ -1,25 +1,49 @@
-# cria catálogo de filmes
-filmes = {
-    1: {'nome': 'Jurassic Park', 'ano': 1993, 'status': 'disponível' },
-    2: {'nome': 'Harry Potter e a Pedra Filosofal', 'ano': 2001, 'status': 'alugado'},
-    3: {'nome': 'Star Wars: A ameaça fantasma', 'ano': 1999, 'status': 'indisponível'}
-}
+# importa arquivo de conexao
+import conexao
 
-# consulta catalogo de filmes
-def consulta_filmes():
-    for consulta, filme in filmes.items():
-        print(consulta, filme)
+# conecta cursor mysql
+cursor = conexao.conexao.cursor()
 
-# escolher filme para alugar
-def aluga_filme(aluga):
-    for chave in filmes:
-        if chave == aluga and filmes[chave]['status'] == 'disponível':
-           filmes[chave].update({'status': 'alugado'})
-    return filmes.get(aluga, 'error')
+# retorna lista de filmes
+def consulta():
+    cursor.execute('select * from filmes')
 
-# devolver filme alugado
-def devolve_filme(devolve):
-    for chave in filmes:
-        if chave == devolve and filmes[chave]['status'] == 'alugado':
-            filmes[chave].update({'status': 'disponível'})
-    return filmes.get(devolve, 'error')
+    resultado = cursor.fetchall()
+    for row in resultado:
+        print(row)
+
+    conexao.conexao.close()
+    cursor.close()
+
+# aluga filme de acordo com o id e status
+def aluga(id):
+    try:
+        cursor.execute('select status from filmes where id = %s', (id,))
+        resultado = cursor.fetchone()
+
+        # verifica status do filme para alugar
+        if not resultado:
+            print('Filme não encontrado!')
+        elif resultado[0] != 'disponível':
+            print('Filme indisponível no momento!')
+        else:
+            cursor.execute('update filmes set status = %s where id = %s', ('alugado', id))
+            conexao.conexao.commit()
+            print('Filme alugado com sucesso!')
+    except Exception as e:
+        print(f'Error: {e}') # em caso de erro este bloco é executado
+    finally:
+        conexao.conexao.close()
+        cursor.close() #fecha as conexões
+
+# devolve o filme de acordo com o id e o status
+def devolve(id):
+    try:
+        cursor.execute('update filmes set status = %s where id = %s and status = %s', ('disponível', id, 'alugado'))
+        conexao.conexao.commit()
+        print(f'Filme devolvido com sucesso!')
+    except Exception as e:
+        print(f'Error: {e}')
+    finally:
+        conexao.conexao.close()
+        cursor.close()
