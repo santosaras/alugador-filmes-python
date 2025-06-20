@@ -1,13 +1,13 @@
-from main import consulta_filmes,aluga_filme, devolve_filme
+import main
 
 opcao = int(input('Digite:\n 1 - Consultar filmes\n 2 - Alugar filme\n 3 - Devolver filme\n Escolha: '))
 
 match opcao:
     case 1:
-        consulta_filmes()
+        main.consulta()
     case 2:
-        aluga = int(input('Informe o filme que deseja alugar: '))
-        print(aluga_filme(aluga))
+        id = int(input('Informe o filme que deseja alugar: '))
+        main.aluga(id)
     case 3:
-        devolve = int(input('Informe o filme que deseja devolver: '))
-        print(devolve_filme(devolve))
+        id = int(input('Informe o filme que deseja devolver: '))
+        main.devolve(id)
